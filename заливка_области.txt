@@ -1,0 +1,92 @@
+ private Bitmap paintzone(Bitmap sourceImage, Bitmap brushFilter, int x, int y, int deltaX, int deltaY)
+        {
+            Bitmap whites = new Bitmap(1, 1);
+            for (int i = 0; i < whites.Width; i++)
+            {
+                for (int j = 0; j < whites.Height; j++)
+                {
+                    whites.SetPixel(i, j, Color.White);
+                }
+            }
+            Grayscale filter1 = new Grayscale(0.2125, 0.7154, 0.0721);
+            Bitmap white = filter1.Apply(whites);
+            Color color = white.GetPixel(0, 0);
+            Color borderColor = white.GetPixel(0, 0);
+
+
+            sourceImage.SetPixel(x, y, color);
+            Bitmap image = (Bitmap)sourceImage.Clone();
+            Bitmap imageNew = new Bitmap(sourceImage.Width, sourceImage.Height);
+
+            Stack<Point> points = new Stack<Point>();
+            points.Push(new Point(x, y));
+
+            Point currentPoint;
+            while (points.Count != 0)
+            {
+                currentPoint = points.Pop();
+                image.SetPixel(currentPoint.X, currentPoint.Y, color);
+                imageNew.SetPixel(currentPoint.X, currentPoint.Y, color);
+
+                if ((currentPoint.X >= 0) && (currentPoint.X < image.Width) && ((currentPoint.Y + 1) >= 0) && ((currentPoint.Y + 1) < image.Height))
+                {
+                    Color topPixel = image.GetPixel(currentPoint.X, currentPoint.Y + 1);
+                    Color topPixelGreen = brushFilter.GetPixel(currentPoint.X, currentPoint.Y + 1);
+
+                    if ((topPixelGreen.R >= topPixelGreen.G || topPixelGreen.Name == "ffff") && topPixel.ToArgb() != borderColor.ToArgb() && topPixel.ToArgb() != color.ToArgb())
+                    {
+                        points.Push(new Point(currentPoint.X, currentPoint.Y + 1));
+                    }
+                }
+
+                if (((currentPoint.X + 1) >= 0) && ((currentPoint.X + 1) < image.Width) && (currentPoint.Y >= 0) && (currentPoint.Y < image.Height))
+                {
+                    Color rightPixel = image.GetPixel(currentPoint.X + 1, currentPoint.Y);
+                    Color rightPixelGreen = brushFilter.GetPixel(currentPoint.X + 1, currentPoint.Y);
+
+                    if ((rightPixelGreen.R >= rightPixelGreen.G || rightPixelGreen.Name == "ffff") && rightPixel.ToArgb() != borderColor.ToArgb() && rightPixel.ToArgb() != color.ToArgb())
+                    {
+                        points.Push(new Point(currentPoint.X + 1, currentPoint.Y));
+                    }
+                }
+
+                if ((currentPoint.X >= 0) && (currentPoint.X < image.Width) && ((currentPoint.Y - 1) >= 0) && ((currentPoint.Y - 1) < image.Height))
+                {
+                    Color bottomPixel = image.GetPixel(currentPoint.X, currentPoint.Y - 1);
+                    Color bottomPixelGreen = brushFilter.GetPixel(currentPoint.X, currentPoint.Y - 1);
+
+                    if ((bottomPixelGreen.R >= bottomPixelGreen.G || bottomPixelGreen.Name == "ffff") && bottomPixel.ToArgb() != borderColor.ToArgb() && bottomPixel.ToArgb() != color.ToArgb())
+                    {
+                        points.Push(new Point(currentPoint.X, currentPoint.Y - 1));
+                    }
+                }
+
+                if (((currentPoint.X - 1) >= 0) && ((currentPoint.X - 1) < image.Width) && (currentPoint.Y >= 0) && (currentPoint.Y < image.Height))
+                {
+                    Color leftPixel = image.GetPixel(currentPoint.X - 1, currentPoint.Y);
+                    Color leftPixelGreen = brushFilter.GetPixel(currentPoint.X - 1, currentPoint.Y);
+
+                    if ((leftPixelGreen.R >= leftPixelGreen.G || leftPixelGreen.Name == "ffff") && leftPixel.ToArgb() != borderColor.ToArgb() && leftPixel.ToArgb() != color.ToArgb())
+                    {
+                        points.Push(new Point(currentPoint.X - 1, currentPoint.Y));
+                    }
+                }
+            }
+
+            foreach (Point po in points)
+            {
+                for (int i = 1; i < 5; i++)
+                {
+                    image.SetPixel(po.X, po.Y - i, color);
+                    imageNew.SetPixel(po.X, po.Y - i, color);
+                    image.SetPixel(po.X, po.Y + i, color);
+                    imageNew.SetPixel(po.X, po.Y + i, color);
+                    image.SetPixel(po.X - i, po.Y, color);
+                    imageNew.SetPixel(po.X - i, po.Y, color);
+                    image.SetPixel(po.X + i, po.Y, color);
+                    imageNew.SetPixel(po.X + i, po.Y, color);
+                }
+
+            }
+            return imageNew;
+        }

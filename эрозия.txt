@@ -1,0 +1,10 @@
+        //эрозия отбинаризованного изображения
+        public Bitmap Eroz(Image img)
+        {
+            Bitmap b = new Bitmap(img);
+            Grayscale filter1 = new Grayscale(0.2125, 0.7154, 0.0721);
+            Bitmap grayImage = filter1.Apply(b);
+            BinaryErosion3x3 filter2 = new BinaryErosion3x3();
+            Bitmap res = filter2.Apply(grayImage);
+            return res;
+        }

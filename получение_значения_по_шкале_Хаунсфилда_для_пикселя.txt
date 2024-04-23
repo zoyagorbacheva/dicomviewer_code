@@ -1,0 +1,40 @@
+//значение в Хаунсфилдах для конкретного пикселя
+        public double GetHounsfieldOfPixel(int x, int y, int slice)
+        {
+            var dcm = DICOMObject.Read(allfiles[slice]);
+            var dicomfile = DicomFile.Open(allfiles[slice]);
+            DicomDataset dataset = new DicomDataset();
+            dataset = dicomfile.Dataset.Clone();
+            DicomTranscoder xx = new DicomTranscoder(DicomTransferSyntax.JPEGProcess14SV1, DicomTransferSyntax.ImplicitVRLittleEndian);
+            IByteBuffer newpixelData1 = xx.DecodeFrame(dataset, 0);
+
+            List<byte> newpixelData = newpixelData1.Data.ToList();
+            List<byte> pixelData = newpixelData;
+
+            ushort bitsAllocated = (ushort)dcm.FindFirst(TagHelper.BitsAllocated).DData;
+            ushort bitsStored = (ushort)dcm.FindFirst(TagHelper.BitsStored).DData;
+            double intercept = (double)dcm.FindFirst(TagHelper.RescaleIntercept).DData;
+            double slope = (double)dcm.FindFirst(TagHelper.RescaleSlope).DData;
+            ushort pixelRepresentation = (ushort)dcm.FindFirst(TagHelper.PixelRepresentation).DData;
+
+            int index = 0;
+            ushort mask = (ushort)(ushort.MaxValue >> (bitsAllocated - bitsStored));
+            double maxval = Math.Pow(2, bitsStored);
+
+            ushort gray;
+            if ((2 * (y * 512 + x) + 1) <= 524288)
+                gray = (ushort)((ushort)(pixelData[2 * (y * 512 + x)]) + (ushort)(pixelData[2 * (y * 512 + x) + 1] << 8));
+            else
+                gray = (ushort)((ushort)(pixelData[524286]) + (ushort)(pixelData[524287] << 8));
+            double valgray = gray & mask;
+
+            if (pixelRepresentation == 1)
+            {
+                if (valgray > (maxval / 2))
+                    valgray = (valgray - maxval);
+
+            }
+            valgray = slope * valgray + intercept;
+
+            return valgray;
+        }

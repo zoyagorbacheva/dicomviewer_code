@@ -1,0 +1,24 @@
+ //бинаризация по порогу значения хаунсфилда
+        public Image Binarization(Image img, int[,] allPix, int porog)
+        {
+            if (pictureBox1 != null)
+            {
+                Bitmap b = new Bitmap(img);
+                Bitmap bb = new Bitmap(img);
+
+                for (int i = 0; i < b.Width; i++)
+                {
+                    for (int j = 0; j < b.Height; j++)
+                    {
+                        if (allPix[i, j] >= porog)
+
+                            bb.SetPixel(i, j, Color.White);
+                        else
+                            bb.SetPixel(i, j, Color.Black);
+                    }
+                }
+                Image output = bb;
+                return output;
+            }
+            return null;
+        }
